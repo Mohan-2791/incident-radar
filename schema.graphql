@@ -1,0 +1,113 @@
+"""Date with time (isoformat)"""
+scalar DateTime
+
+type IncidentConnection {
+  edges: [IncidentEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type IncidentEdge {
+  cursor: String!
+  node: IncidentType!
+}
+
+input IncidentFilter {
+  status: [Status!] = null
+  severity: [Severity!] = null
+  serviceId: ID = null
+  search: String = null
+}
+
+union IncidentPayload = IncidentType | UserError
+
+type IncidentType {
+  id: ID!
+  title: String!
+  severity: Severity!
+  status: Status!
+  createdAt: DateTime!
+  resolvedAt: DateTime
+  durationMinutes: Int!
+  service: ServiceType!
+  updates: [UpdateType!]!
+}
+
+type Mutation {
+  openIncident(input: OpenIncidentInput!): IncidentPayload!
+  postUpdate(input: PostUpdateInput!): IncidentPayload!
+}
+
+input OpenIncidentInput {
+  serviceId: ID!
+  title: String!
+  severity: Severity!
+  message: String!
+}
+
+type PageInfo {
+  hasNextPage: Boolean!
+  endCursor: String
+}
+
+input PostUpdateInput {
+  incidentId: ID!
+  status: Status!
+  message: String!
+}
+
+type Query {
+  services: [ServiceType!]!
+  incident(id: ID!): IncidentType
+  incidents(filter: IncidentFilter = null, first: Int! = 20, after: String = null): IncidentConnection!
+  stats: Stats!
+}
+
+type ServiceType {
+  id: ID!
+  name: String!
+  tier: Int!
+  ownerTeam: String!
+  openIncidentCount: Int!
+}
+
+enum Severity {
+  SEV1
+  SEV2
+  SEV3
+}
+
+type SeverityCount {
+  severity: Severity!
+  count: Int!
+}
+
+type Stats {
+  openTotal: Int!
+  openBySeverity: [SeverityCount!]!
+  resolvedLast30Days: Int!
+  meanMinutesToResolve: Float
+}
+
+enum Status {
+  INVESTIGATING
+  IDENTIFIED
+  MONITORING
+  RESOLVED
+}
+
+type Subscription {
+  incidentChanged: IncidentType!
+}
+
+type UpdateType {
+  id: ID!
+  message: String!
+  status: Status!
+  createdAt: DateTime!
+}
+
+type UserError {
+  field: String!
+  message: String!
+}

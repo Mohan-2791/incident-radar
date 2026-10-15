@@ -1,0 +1,6 @@
+fastapi>=0.115
+uvicorn[standard]>=0.30
+strawberry-graphql[fastapi,cli]>=0.280
+sqlalchemy>=2.0
+aiosqlite>=0.20
+greenlet>=3.0
